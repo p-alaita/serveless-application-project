@@ -1,30 +1,26 @@
 import * as AWS from 'aws-sdk'
-import * as AWSXRay from 'aws-xray-sdk'
+import { Types } from 'aws-sdk/clients/s3';
+// import * as AWSXRay from 'aws-xray-sdk'
+import { createLogger } from '../utils/logger'
 
-const XAWS = AWSXRay.captureAWS(AWS)
+const logger = createLogger('TodosAccess')
 
 // TODO: Implement the fileStogare logic
 
-export class TodosStorage {
+export class AttachmentUtils {
 
-    constructor(
-      private readonly s3 = new XAWS.S3({ signatureVersion: 'v4' }),
-      private readonly bucketName = process.env.ATTACHMENTS_S3_BUCKET,
-      private readonly urlExpiration = process.env.SIGNED_URL_EXPIRATION
-    ) {}
+  static async generateUploadUrl(todoId: string): Promise<string> {
+
+      const s3Client: Types = new AWS.S3({ signatureVersion: 'v4' })
   
-    async getAttachmentUrl(attachmentId: string): Promise<string> {
-        const attachmentUrl = `https://${this.bucketName}.s3.amazonaws.com/${attachmentId}`
-        return attachmentUrl
-    }
+      const url = s3Client.getSignedUrl('putObject', {
+          Bucket: process.env.ATTACHMENT_S3_BUCKET,
+          Key: todoId,
+          Expires: 1000,
+      });
+
+      logger.log('info', `Generating S3 bucket URL: ${url}`);
   
-    async getUploadUrl(attachmentId: string): Promise<string> {
-      const uploadUrl = this.s3.getSignedUrl('putObject', {
-        Bucket: this.bucketName,
-        Key: attachmentId,
-        Expires: this.urlExpiration
-      })
-      return uploadUrl
-    }
-  
+      return url as string;
   }
+}

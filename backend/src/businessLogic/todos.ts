@@ -1,4 +1,5 @@
 import {TodoItem} from "../models/TodoItem";
+import { AttachmentUtils } from '../fileStorage/attachmentUtils';
 import {parseUserId} from "../auth/utils";
 import {CreateTodoRequest} from "../requests/CreateTodoRequest";
 import {UpdateTodoRequest} from "../requests/UpdateTodoRequest";
@@ -22,7 +23,7 @@ export function createToDo(createTodoRequest: CreateTodoRequest, jwtToken: strin
     return toDoAccess.createToDo({
         userId: userId,
         todoId: todoId,
-        attachmentUrl:  `https://${s3BucketName}.s3.amazonaws.com/${todoId}`, 
+        attachmentUrl: `https://${s3BucketName}.s3.amazonaws.com/${todoId}`, 
         createdAt: new Date().getTime().toString(),
         done: false,
         ...createTodoRequest,
@@ -40,5 +41,5 @@ export function deleteToDo(todoId: string, jwtToken: string): Promise<string> {
 }
 
 export function generateUploadUrl(todoId: string): Promise<string> {
-    return toDoAccess.generateUploadUrl(todoId);
+    return AttachmentUtils.generateUploadUrl(todoId);
 }
